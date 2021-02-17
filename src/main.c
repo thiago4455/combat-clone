@@ -47,12 +47,12 @@ int main() {
                 al_clear_to_color(al_map_rgb(255,255,255));
                 // RENDER CODE
                 float pos2 = recive_message();
-                al_draw_filled_rectangle(position, 400, 50+position, 450, al_map_rgb(255,0,0));
+                al_draw_filled_rectangle(pos2, 400, 50+pos2, 450, al_map_rgb(255,0,0));
                 position++;
                 al_draw_filled_rectangle(position, 600, 50+position, 650, al_map_rgb(0,0,255));
 
                 al_flip_display();
-                // send_message(&position);
+                send_message(&position);
         default:
             break;
         }

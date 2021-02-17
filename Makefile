@@ -7,12 +7,10 @@ TARGET = multiplayer
 
 ifeq ($(OS),Windows_NT)
 	OBJFILES := $(addsuffix .c, $(OBJFILES)) WindowsClient.c
-	WIN_FODER_NAME=\allegro-$(ALLEGRO_VERSION)-mingw-$(MINGW_VERSION)
-	PATH_ALLEGRO=$(WIN_FOLDER)$(WIN_FODER_NAME)
-	LIB_ALLEGRO=\lib\liballegro-$(ALLEGRO_VERSION)-monolith-mt.a
-	INCLUDE_ALLEGRO=\include
+	PATH_ALLEGRO=$(WIN_FOLDER)\allegro-$(ALLEGRO_VERSION)-mingw-$(MINGW_VERSION)
+	ALLEGRO_INCLUDE = $(PATH_ALLEGRO)\lib\liballegro-$(ALLEGRO_VERSION)-monolith-mt.a -I $(PATH_ALLEGRO)\include
 	WINDOWS_FLAGS = -lws2_32
-	COMMAND=gcc -I $(PATH_ALLEGRO)$(INCLUDE_ALLEGRO) $(addprefix src/, $(OBJFILES)) $(PATH_ALLEGRO)$(LIB_ALLEGRO) -o $(TARGET).exe
+	COMMAND = gcc $(addprefix src/, $(OBJFILES)) $(ALLEGRO_INCLUDE) -o $(TARGET).exe $(WINDOWS_FLAGS)
 else
 	OBJFILES := $(addsuffix .o, $(OBJFILES)) LinuxClient.o
 	LINUX_FLAGS=-Wall -lallegro -lallegro_image -lallegro_primitives -lm

@@ -14,7 +14,6 @@
 
 int sockfd; 
 float buffer; 
-char *hello = 0; 
 struct sockaddr_in     servaddr; 
 
 void create_connection(){  
