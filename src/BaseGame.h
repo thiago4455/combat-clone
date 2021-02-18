@@ -81,5 +81,6 @@ void PlayerInputDown(struct Player *player, struct PLAYER_CONTROLS controller, u
 void PlayerInputUp(struct Player *player, struct PLAYER_CONTROLS controller, unsigned char key);
 void PlayerUpdate(struct Player *player);
 void UpdateBullets();
+void ResetBullets();
 
 #endif //BASE_GAME_H

@@ -5,6 +5,8 @@
 
 extern unsigned int WINDOW_WIDTH;
 extern unsigned int WINDOW_HEIGHT;
+extern int gameState;
+int initializedPlayers = 0;
 
 struct Player Players[PLAYERS_NUMBER];
 struct PLAYER_CONTROLS C_Player[PLAYERS_NUMBER];
@@ -24,6 +26,9 @@ void G_EventHandler(MANAGER_FUNCION_TYPE function_type, unsigned char event_data
             al_clear_to_color(al_map_hex(BACKGROUND_COLOR));
             G_Render();
             al_flip_display();
+        }else{
+            ResetBullets();
+            gameState = STATE_MENU;
         }
         break;
     
@@ -33,6 +38,7 @@ void G_EventHandler(MANAGER_FUNCION_TYPE function_type, unsigned char event_data
 }
 
 void G_Start(){
+    initializedPlayers = 0;
     CreatePlayer(90, WINDOW_HEIGHT/2, 0,
                 (struct PLAYER_CONTROLS) {ALLEGRO_KEY_W, ALLEGRO_KEY_S, ALLEGRO_KEY_A, ALLEGRO_KEY_D, ALLEGRO_KEY_SPACE},
                 "assets/tank.png", 0x0000ff);
@@ -59,7 +65,7 @@ int G_Update(){
     {
         PlayerUpdate(&Players[i]);
         if(Players[i].Health <= 0){
-            // return 1;
+            return 1;
         }
     }
     UpdateBullets();
@@ -106,7 +112,6 @@ void G_Render(){
 // 
 // Initialize player
 // 
-int initializedPlayers = 0;
 void CreatePlayer(float initialPosX, float initialPosY, float initialRot, struct PLAYER_CONTROLS controller, const char *playerImage, unsigned int bulletColor){
     Players[initializedPlayers] = (struct Player) { 0, 0, initialPosX, initialPosY, initialRot, 0, 0, 0, bulletColor, MAX_HEALTH, al_load_bitmap(playerImage)};
     C_Player[initializedPlayers] = controller;
@@ -209,4 +214,12 @@ void UpdateBullets(){
         }
     }
     
+}
+
+void ResetBullets(){
+    int i;
+    for (i = 0; i < MAX_BULLET_QUANTITY; i++)
+    {
+        bullets[i].Active = 0;
+    }
 }

@@ -72,7 +72,6 @@ int isButtonHover(struct MenuButton button){
 }
 
 void handleClick(MENU_ACTION action){
-    al_set_system_mouse_cursor(display, ALLEGRO_SYSTEM_MOUSE_CURSOR_DEFAULT);
     switch (action)
     {
         case EXIT:
@@ -82,6 +81,7 @@ void handleClick(MENU_ACTION action){
         
         case START_SIMPLE_GAME:
             G_Start();
+            al_set_system_mouse_cursor(display, ALLEGRO_SYSTEM_MOUSE_CURSOR_DEFAULT);
             gameState = STATE_GAME;
             break;
         
