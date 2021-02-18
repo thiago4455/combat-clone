@@ -3,7 +3,7 @@ MINGW_VERSION=4.7.0
 WIN_FOLDER=C:
 
 OBJFILES = main Manager Utils Menu BaseGame
-TARGET = multiplayer
+TARGET = combat
 
 ifeq ($(OS),Windows_NT)
 	OBJFILES := $(addsuffix .c, $(OBJFILES)) WindowsClient.c
