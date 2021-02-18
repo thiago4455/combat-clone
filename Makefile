@@ -2,7 +2,7 @@ ALLEGRO_VERSION=5.0.10
 MINGW_VERSION=4.7.0
 WIN_FOLDER=C:
 
-OBJFILES = main Manager Utils Menu
+OBJFILES = main Manager Utils Menu BaseGame
 TARGET = multiplayer
 
 ifeq ($(OS),Windows_NT)
@@ -14,7 +14,7 @@ ifeq ($(OS),Windows_NT)
 	CLEAR_COMMAND = del $(TARGET).exe
 else
 	OBJFILES := $(addsuffix .o, $(OBJFILES)) LinuxClient.o
-	LINUX_FLAGS=-Wall -lallegro -lallegro_image -lallegro_primitives -lm
+	LINUX_FLAGS=-Wall -lallegro -lallegro_image -lallegro_primitives -lallegro_font -lallegro_ttf -lm
 	COMMAND=gcc $(LINUX_FLAGS) -o $(TARGET) $(addprefix src/, $(OBJFILES))
 	CLEAR_COMMAND = rm -f  $(addprefix src/, $(OBJFILES)) $(TARGET) *~
 endif
