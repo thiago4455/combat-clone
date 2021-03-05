@@ -49,7 +49,7 @@ struct PLAYER_CONTROLS{
     unsigned char fire;
 };
 
-void G_EventHandler(MANAGER_FUNCION_TYPE function_type, unsigned char event_data, char event_type);
+void G_EventHandler(ManagerFunctionType function_type, unsigned char event_data, char event_type);
 
 
 /**

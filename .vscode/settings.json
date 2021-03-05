@@ -3,6 +3,11 @@
         "condition_variable": "c",
         "array": "c",
         "hash_map": "c",
-        "string_view": "c"
+        "string_view": "c",
+        "bitset": "c",
+        "initializer_list": "c",
+        "ranges": "c",
+        "utility": "c",
+        "valarray": "c"
     }
 }

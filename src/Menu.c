@@ -3,11 +3,11 @@
 #include <stdio.h>
 
 extern ALLEGRO_DISPLAY *display;
-extern int gameState;
+extern ManagerGameState gameState;
 extern unsigned int WINDOW_WIDTH;
 extern unsigned int WINDOW_HEIGHT;
 
-void MenuEventHandler(MANAGER_FUNCION_TYPE function_type, unsigned char event_data, char event_type){
+void MenuEventHandler(ManagerFunctionType function_type, unsigned char event_data, char event_type){
     switch (function_type)
     {
     case GAME_INPUT:

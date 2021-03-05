@@ -3,15 +3,14 @@
 #include "Manager.h"
 
 void InitMenu();
-void MenuEventHandler(MANAGER_FUNCION_TYPE function_type, unsigned char event_data, char event_type);
+void MenuEventHandler(ManagerFunctionType function_type, unsigned char event_data, char event_type);
 void InputManager(unsigned char key, char type);
 void Renderer();
 
-typedef unsigned int MENU_ACTION;
-enum{
+typedef enum{
     START_SIMPLE_GAME = 1,
     EXIT = 0
-};
+} MENU_ACTION;
 
 struct MenuButton{
     int x0;

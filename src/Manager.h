@@ -12,20 +12,19 @@ void M_Run();
 void M_Cleanup();
 
 static const unsigned int FPS = 60;
+static const unsigned int FULLSCREEN = 0;
 
-typedef unsigned int MANAGER_GAME_STATE;
-enum{
+typedef enum{
     STATE_EXIT = 0,
     STATE_MENU = 1,
     STATE_GAME = 2
-};
+} ManagerGameState;
 
-typedef unsigned int MANAGER_FUNCION_TYPE;
-enum{
+typedef enum{
     GAME_INPUT = 1,
     GAME_RENDERER = 2
-};
+} ManagerFunctionType;
 
-void EventManager(MANAGER_FUNCION_TYPE function_type, unsigned char event_data, char event_type);
+void EventManager(ManagerFunctionType function_type, unsigned char event_data, char event_type);
 
 #endif //MANAGER_H

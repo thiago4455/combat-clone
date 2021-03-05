@@ -5,7 +5,7 @@
 
 extern unsigned int WINDOW_WIDTH;
 extern unsigned int WINDOW_HEIGHT;
-extern int gameState;
+extern ManagerGameState gameState;
 int initializedPlayers = 0;
 
 struct Player Players[PLAYERS_NUMBER];
@@ -14,7 +14,7 @@ struct PLAYER_CONTROLS C_Player[PLAYERS_NUMBER];
 struct Bullet bullets[MAX_BULLET_QUANTITY];
 
 
-void G_EventHandler(MANAGER_FUNCION_TYPE function_type, unsigned char event_data, char event_type){
+void G_EventHandler(ManagerFunctionType function_type, unsigned char event_data, char event_type){
     switch (function_type)
     {
     case GAME_INPUT:
