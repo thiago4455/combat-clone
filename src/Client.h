@@ -15,7 +15,7 @@ struct ServerPackage{
     PackageType type;
     unsigned int package_identifier; //Package id or type
     unsigned int size;
-    unsigned char buffer[];
+    void *buffer;
 };
 
 void create_connection();

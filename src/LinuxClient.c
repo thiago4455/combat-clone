@@ -11,7 +11,7 @@
 #include <pthread.h>
 
 #define PORT     4242 
-
+const int MS_PER_TICK = 1000 / 60;
 
 int sockfd; 
 struct sockaddr_in     servaddr; 
@@ -67,12 +67,18 @@ void close_server(){
     close(sockfd); 
 }
 
-void *gameMessage;
+unsigned int getTimeMs(){
+    struct timeval time;
+    gettimeofday(&time, NULL);
+    return time.tv_sec * 1000000 + time.tv_usec;
+}
 
 void *connection_thread_handler(){
-    while (1)
-    {
-        server_loop();
-    }
-    
+    unsigned int currentTime = getTimeMs() + MS_PER_TICK;
+    while (1)    
+        while (currentTime < getTimeMs())
+        {
+            server_loop();
+            currentTime += MS_PER_TICK;
+        }
 }
