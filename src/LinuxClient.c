@@ -50,7 +50,7 @@ void send_message(void *buffer, unsigned int size){
     sendto(sockfd, buffer, size, 
         MSG_CONFIRM, (const struct sockaddr *) &servaddr,  
             sizeof(servaddr));
-    printf("Message sent.\n"); 
+    // printf("Message sent.\n"); 
 }
 
 int recive_message(void *buffer, unsigned int size){
