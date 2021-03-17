@@ -1,6 +1,7 @@
 #include "BaseGame.h"
 #include <math.h>
 #include <stdio.h>
+#include "Client.h"
 
 
 extern unsigned int WINDOW_WIDTH;
@@ -8,8 +9,9 @@ extern unsigned int WINDOW_HEIGHT;
 extern ManagerGameState gameState;
 int initializedPlayers = 0;
 
-struct Player Players[PLAYERS_NUMBER];
-struct PLAYER_CONTROLS C_Player[PLAYERS_NUMBER];
+struct Player Players[MAX_PLAYERS_NUMBER];
+struct PLAYER_CONTROLS C_Player[MAX_PLAYERS_NUMBER];
+unsigned char OnlinePlayers[MAX_PLAYERS_NUMBER];
 
 struct Bullet bullets[MAX_BULLET_QUANTITY];
 
@@ -50,7 +52,7 @@ void G_Start(){
 
 void G_ProcessInput(unsigned char key, char type){
     int i;
-    for (i = 0; i < PLAYERS_NUMBER; i++)
+    for (i = 0; i < initializedPlayers; i++)
     {
         if(!type)
             PlayerInputDown(&Players[i], C_Player[i], key);
@@ -61,7 +63,7 @@ void G_ProcessInput(unsigned char key, char type){
 
 int G_Update(){
     int i;
-    for (i = 0; i < PLAYERS_NUMBER; i++)
+    for (i = 0; i < initializedPlayers; i++)
     {
         PlayerUpdate(&Players[i]);
         if(Players[i].Health <= 0){
@@ -69,13 +71,18 @@ int G_Update(){
         }
     }
     UpdateBullets();
+    send_input_data((struct InputPackage) {
+        Players[0].TranslationV,
+        Players[0].RotationV,
+        Players[0].WillFire
+    });
 
     return 0;
 }
 
 void G_Render(){
     int i;
-    for (i = 0; i < PLAYERS_NUMBER; i++){
+    for (i = 0; i < initializedPlayers; i++){
         // 
         // Draw health
         // 
@@ -118,6 +125,31 @@ void CreatePlayer(float initialPosX, float initialPosY, float initialRot, struct
     initializedPlayers++;
 }
 
+int getOnlinePlayer(unsigned char player_id);
+void MultiplayerInput(int i, struct InputPackage input){
+        // if (controls.up)
+        //     Players[i].TranslationV = 1;
+        // else if(controls.down)
+        //     Players[i].TranslationV = -1;
+        // if(controls.left)
+        //     Players[i].RotationV = 1;
+        // else if(controls.right)
+        //     Players[i].RotationV = -1;
+        // if(controls.fire)
+        //     Players[i].WillFire = 1;
+}
+
+void HandleMultiplayerInput(unsigned char player_id, struct InputPackage input){
+    int currentPlayer = getOnlinePlayer(player_id);
+    if(currentPlayer == -1){
+        OnlinePlayers[initializedPlayers] = player_id;
+        CreatePlayer(WINDOW_WIDTH - 90, WINDOW_HEIGHT/2, ALLEGRO_PI, (struct PLAYER_CONTROLS) {0, 0, 0, 0, 0}, "assets/tank2.png", 0xff0000);
+        MultiplayerInput(initializedPlayers-1, input);
+    }
+    else {
+        MultiplayerInput(currentPlayer, input);
+    }
+}
 
 // 
 // Manage inputs
@@ -222,4 +254,16 @@ void ResetBullets(){
     {
         bullets[i].Active = 0;
     }
+}
+
+int getOnlinePlayer(unsigned char player_id)
+{
+    int i;
+    for (i = 0; i < MAX_PLAYERS_NUMBER; i++)
+    {
+        if(player_id==OnlinePlayers[i]){
+            return i;
+        }
+    }
+    return -1;
 }

@@ -31,8 +31,8 @@ void create_connection(){
     // Filling server information 
     servaddr.sin_family = AF_INET; 
     servaddr.sin_port = htons(PORT); 
-    // servaddr.sin_addr.s_addr = inet_addr("35.247.224.237"); // INADDR_ANY;   
-    servaddr.sin_addr.s_addr = INADDR_ANY;   
+    servaddr.sin_addr.s_addr = inet_addr("35.247.224.237"); // INADDR_ANY;   
+    // servaddr.sin_addr.s_addr = INADDR_ANY;   
     setsockopt(sockfd,SOL_SOCKET,SO_RCVTIMEO,(char*)&timeout,sizeof(struct timeval));  
 
     pthread_t thread;
@@ -57,9 +57,10 @@ int recive_message(void *buffer, unsigned int size){
     int n, len; 
           
     n = recvfrom(sockfd, buffer, size,  
-                MSG_WAITALL, (struct sockaddr *) &servaddr, 
-                &len); 
-            
+                0, NULL, NULL); 
+    if(n<0){
+        // printf("Error\n:%d", * (int *) buffer);
+    }
     return n;
 }
 

@@ -5,7 +5,7 @@
 
 static const unsigned int BACKGROUND_COLOR = 0x769971;
 
-#define PLAYERS_NUMBER 2
+#define MAX_PLAYERS_NUMBER 2
 #define MAX_BULLET_QUANTITY 100
 
 static const int MAX_HEALTH = 100;
@@ -49,6 +49,12 @@ struct PLAYER_CONTROLS{
     unsigned char fire;
 };
 
+struct InputPackage{
+    char TranslationV;
+    char RotationV;
+    char WillFire;
+};
+
 void G_EventHandler(ManagerFunctionType function_type, unsigned char event_data, char event_type);
 
 
@@ -82,5 +88,7 @@ void PlayerInputUp(struct Player *player, struct PLAYER_CONTROLS controller, uns
 void PlayerUpdate(struct Player *player);
 void UpdateBullets();
 void ResetBullets();
+void InitOnlinePlayer();
+void HandleMultiplayerInput(unsigned char player_id, struct InputPackage input);
 
 #endif //BASE_GAME_H

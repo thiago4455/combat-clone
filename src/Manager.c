@@ -2,12 +2,13 @@
 
 #include "Menu.h"
 #include "BaseGame.h"
+#include "Client.h"
 
 ALLEGRO_DISPLAY *display;
 ALLEGRO_EVENT_QUEUE *queue;
 ALLEGRO_TIMER *timer;
-unsigned int WINDOW_WIDTH = 800;
-unsigned int WINDOW_HEIGHT = 800;
+unsigned int WINDOW_WIDTH = 900;
+unsigned int WINDOW_HEIGHT = 900;
 ManagerGameState gameState;
 
 void M_Init(){
@@ -44,6 +45,7 @@ void M_Init(){
 
     al_clear_to_color(al_map_hex(0x212121));
     al_flip_display();
+    create_connection();
 }
 
 void M_Run(){

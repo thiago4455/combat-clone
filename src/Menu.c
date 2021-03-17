@@ -80,8 +80,8 @@ void handleClick(MENU_ACTION action){
             break;
         
         case START_SIMPLE_GAME:
-            G_Start();
             al_set_system_mouse_cursor(display, ALLEGRO_SYSTEM_MOUSE_CURSOR_DEFAULT);
+            G_Start();
             gameState = STATE_GAME;
             break;
         

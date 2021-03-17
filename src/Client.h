@@ -1,6 +1,8 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
+#include "BaseGame.h"
+
 #define RECV_PACKAGE_SIZE 1024
 
 typedef enum {
@@ -27,6 +29,7 @@ struct ServerPackage{
 struct ServerMessage{
     PackageType type;
     unsigned int package_identifier;
+    unsigned int timestamp;
     unsigned int size;
     char buffer[];
 };
@@ -34,6 +37,7 @@ struct ServerMessage{
 void create_connection();
 void send_message(void *buffer, unsigned int size);
 int recive_message(void *buffer, unsigned int size);
+unsigned int getTimeMs();
 void close_server();
 
 void server_loop();
@@ -52,5 +56,7 @@ struct TrustedPackage
     TrustedEventType event_type;
 };
 
+
+void send_input_data(struct InputPackage input);
 
 #endif //CLIENT_H
