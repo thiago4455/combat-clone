@@ -3,15 +3,13 @@
 #include <stdio.h>
 #include "Client.h"
 
-
-extern unsigned int WINDOW_WIDTH;
-extern unsigned int WINDOW_HEIGHT;
 extern ManagerGameState gameState;
 int initializedPlayers = 0;
+int initializedOnlinePlayers = 0;
 
 struct Player Players[MAX_PLAYERS_NUMBER];
 struct PLAYER_CONTROLS C_Player[MAX_PLAYERS_NUMBER];
-unsigned char OnlinePlayers[MAX_PLAYERS_NUMBER];
+struct OnlinePlayer OnlinePlayers[MAX_PLAYERS_NUMBER];
 
 struct Bullet bullets[MAX_BULLET_QUANTITY];
 
@@ -41,13 +39,14 @@ void G_EventHandler(ManagerFunctionType function_type, unsigned char event_data,
 
 void G_Start(){
     initializedPlayers = 0;
-    CreatePlayer(90, WINDOW_HEIGHT/2, 0,
-                (struct PLAYER_CONTROLS) {ALLEGRO_KEY_W, ALLEGRO_KEY_S, ALLEGRO_KEY_A, ALLEGRO_KEY_D, ALLEGRO_KEY_SPACE},
-                "assets/tank.png", 0x0000ff);
+    reset_connection();
+    // CreatePlayer(90, WINDOW_HEIGHT/2, 0,
+    //             (struct PLAYER_CONTROLS) {ALLEGRO_KEY_W, ALLEGRO_KEY_S, ALLEGRO_KEY_A, ALLEGRO_KEY_D, ALLEGRO_KEY_SPACE},
+    //             "assets/tank.png", 0x0000ff);
 
-    CreatePlayer(WINDOW_WIDTH - 90, WINDOW_HEIGHT/2, ALLEGRO_PI,
-                (struct PLAYER_CONTROLS) {ALLEGRO_KEY_UP, ALLEGRO_KEY_DOWN, ALLEGRO_KEY_LEFT, ALLEGRO_KEY_RIGHT, ALLEGRO_KEY_ENTER},
-                "assets/tank2.png", 0xff0000);
+    // CreatePlayer(WINDOW_WIDTH - 90, WINDOW_HEIGHT/2, ALLEGRO_PI,
+    //             (struct PLAYER_CONTROLS) {ALLEGRO_KEY_UP, ALLEGRO_KEY_DOWN, ALLEGRO_KEY_LEFT, ALLEGRO_KEY_RIGHT, ALLEGRO_KEY_ENTER},
+    //             "assets/tank2.png", 0xff0000);
 }
 
 void G_ProcessInput(unsigned char key, char type){
@@ -74,7 +73,10 @@ int G_Update(){
     send_input_data((struct InputPackage) {
         Players[0].TranslationV,
         Players[0].RotationV,
-        Players[0].WillFire
+        Players[0].WillFire,
+        Players[0].PosX,
+        Players[0].PosY,
+        Players[0].Rotation
     });
 
     return 0;
@@ -127,24 +129,18 @@ void CreatePlayer(float initialPosX, float initialPosY, float initialRot, struct
 
 int getOnlinePlayer(unsigned char player_id);
 void MultiplayerInput(int i, struct InputPackage input){
-        // if (controls.up)
-        //     Players[i].TranslationV = 1;
-        // else if(controls.down)
-        //     Players[i].TranslationV = -1;
-        // if(controls.left)
-        //     Players[i].RotationV = 1;
-        // else if(controls.right)
-        //     Players[i].RotationV = -1;
-        // if(controls.fire)
-        //     Players[i].WillFire = 1;
+        Players[i].TranslationV = input.TranslationV;
+        Players[i].RotationV = input.RotationV;
+        Players[i].WillFire = input.WillFire;
+        // Players[i].PosX = input.PosX;
+        // Players[i].PosY = input.PosY;
+        // Players[i].Rotation = input.Rotation;
 }
 
-void HandleMultiplayerInput(unsigned char player_id, struct InputPackage input){
+void HandleMultiplayerInput(unsigned char player_id, struct InputPackage input){ 
     int currentPlayer = getOnlinePlayer(player_id);
     if(currentPlayer == -1){
-        OnlinePlayers[initializedPlayers] = player_id;
-        CreatePlayer(WINDOW_WIDTH - 90, WINDOW_HEIGHT/2, ALLEGRO_PI, (struct PLAYER_CONTROLS) {0, 0, 0, 0, 0}, "assets/tank2.png", 0xff0000);
-        MultiplayerInput(initializedPlayers-1, input);
+        // send_init_package();
     }
     else {
         MultiplayerInput(currentPlayer, input);
@@ -259,11 +255,31 @@ void ResetBullets(){
 int getOnlinePlayer(unsigned char player_id)
 {
     int i;
-    for (i = 0; i < MAX_PLAYERS_NUMBER; i++)
+    for (i = 0; i < initializedOnlinePlayers; i++)
     {
-        if(player_id==OnlinePlayers[i]){
-            return i;
+        if(player_id==OnlinePlayers[i].player_id){
+            return OnlinePlayers[i].instance_index;
         }
     }
     return -1;
+}
+
+const struct PlayerCustomization customizaitons[2] = {
+    (struct PlayerCustomization) {90, 900/2, 0,0x0000ff, "assets/tank.png"},
+    (struct PlayerCustomization) {900 - 90, 900/2, ALLEGRO_PI, 0xff0000, "assets/tank2.png"},
+};
+
+void InitOnlinePlayer(InitPlayerPackage player_package, unsigned char local_id){
+    int currentPlayer = getOnlinePlayer(player_package.player_id);
+    if(currentPlayer == -1){
+        struct OnlinePlayer player = (struct OnlinePlayer) {player_package.player_id, player_package.player_index, initializedPlayers};
+        OnlinePlayers[initializedOnlinePlayers++] = player;
+        if(player.player_id == local_id){
+            CreatePlayer(customizaitons[player.player_index].initialPosX, customizaitons[player.player_index].initialPosY, customizaitons[player.player_index].initialRotation, (struct PLAYER_CONTROLS) {ALLEGRO_KEY_W, ALLEGRO_KEY_S, ALLEGRO_KEY_A, ALLEGRO_KEY_D, ALLEGRO_KEY_SPACE}, customizaitons[player.player_index].sprite, customizaitons[player.player_index].color);
+        }
+        else{
+            CreatePlayer(customizaitons[player.player_index].initialPosX, customizaitons[player.player_index].initialPosY, customizaitons[player.player_index].initialRotation, (struct PLAYER_CONTROLS) {0, 0, 0, 0, 0}, customizaitons[player.player_index].sprite, customizaitons[player.player_index].color);
+        }
+        printf("np:%d\n", player_package.player_id);
+    }
 }

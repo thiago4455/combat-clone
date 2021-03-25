@@ -42,9 +42,11 @@ void close_server();
 
 void server_loop();
 
-// struct InitPackage{
-//     unsigned int game_type;
-// }
+struct InitPackage{
+    unsigned char connection_id;
+    int size;
+    InitPlayerPackage players[];
+};
 
 typedef enum {
     PLAYER_WON = 0
@@ -58,5 +60,7 @@ struct TrustedPackage
 
 
 void send_input_data(struct InputPackage input);
+void send_init_package();
+void reset_connection();
 
 #endif //CLIENT_H

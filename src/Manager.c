@@ -7,8 +7,8 @@
 ALLEGRO_DISPLAY *display;
 ALLEGRO_EVENT_QUEUE *queue;
 ALLEGRO_TIMER *timer;
-unsigned int WINDOW_WIDTH = 900;
-unsigned int WINDOW_HEIGHT = 900;
+// unsigned int WINDOW_WIDTH = 900;
+// unsigned int WINDOW_HEIGHT = 900;
 ManagerGameState gameState;
 
 void M_Init(){
@@ -20,8 +20,8 @@ void M_Init(){
     al_init_ttf_addon();
     al_install_keyboard();
     al_install_mouse();
-    if(FULLSCREEN)
-        al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
+    // if(FULLSCREEN)
+    //     al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
 
     display = al_create_display(WINDOW_WIDTH, WINDOW_HEIGHT);
     queue = al_create_event_queue();
@@ -31,15 +31,15 @@ void M_Init(){
     al_register_event_source(queue, al_get_timer_event_source(timer));
     al_register_event_source(queue, al_get_keyboard_event_source());
 
-    if(FULLSCREEN){
-        ALLEGRO_MONITOR_INFO info;
-        int i = 0;
-        do{
-            al_get_monitor_info(i++, &info);
-        } while (!(info.x1 == 0 && info.y1 == 0));
-        WINDOW_WIDTH = info.x2 - info.x1;
-        WINDOW_HEIGHT = info.y2 - info.y1;
-    }
+    // if(FULLSCREEN){
+    //     ALLEGRO_MONITOR_INFO info;
+    //     int i = 0;
+    //     do{
+    //         al_get_monitor_info(i++, &info);
+    //     } while (!(info.x1 == 0 && info.y1 == 0));
+    //     WINDOW_WIDTH = info.x2 - info.x1;
+    //     WINDOW_HEIGHT = info.y2 - info.y1;
+    // }
 
     InitMenu();
 

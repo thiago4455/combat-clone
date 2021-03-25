@@ -4,8 +4,6 @@
 
 extern ALLEGRO_DISPLAY *display;
 extern ManagerGameState gameState;
-extern unsigned int WINDOW_WIDTH;
-extern unsigned int WINDOW_HEIGHT;
 
 void MenuEventHandler(ManagerFunctionType function_type, unsigned char event_data, char event_type){
     switch (function_type)

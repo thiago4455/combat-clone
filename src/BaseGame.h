@@ -31,6 +31,14 @@ struct Player
     ALLEGRO_BITMAP *TankBitmap;
 };
 
+struct PlayerCustomization{
+    float initialPosX;
+    float initialPosY;
+    float initialRotation;
+    unsigned int color;
+    char *sprite;
+};
+
 struct Bullet
 {
     int Active;
@@ -53,6 +61,20 @@ struct InputPackage{
     char TranslationV;
     char RotationV;
     char WillFire;
+    float PosX;
+    float PosY;
+    char Rotation;
+};
+
+typedef struct{
+    unsigned char player_id;
+    unsigned char player_index;
+} InitPlayerPackage;
+
+struct OnlinePlayer{
+    unsigned char player_id;
+    unsigned char player_index;
+    int instance_index;
 };
 
 void G_EventHandler(ManagerFunctionType function_type, unsigned char event_data, char event_type);
@@ -88,7 +110,7 @@ void PlayerInputUp(struct Player *player, struct PLAYER_CONTROLS controller, uns
 void PlayerUpdate(struct Player *player);
 void UpdateBullets();
 void ResetBullets();
-void InitOnlinePlayer();
+void InitOnlinePlayer(InitPlayerPackage player_package, unsigned char local_id);
 void HandleMultiplayerInput(unsigned char player_id, struct InputPackage input);
 
 #endif //BASE_GAME_H

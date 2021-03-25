@@ -12,7 +12,9 @@ void M_Run();
 void M_Cleanup();
 
 static const unsigned int FPS = 60;
-static const unsigned int FULLSCREEN = 0;
+// static const unsigned int FULLSCREEN = 0;
+static const unsigned int WINDOW_WIDTH = 900;
+static const unsigned int WINDOW_HEIGHT = 900;
 
 typedef enum{
     STATE_EXIT = 0,

@@ -10,11 +10,11 @@ void handle_reliable_package(struct ServerMessage *package);
 void send_init_package();
 
 unsigned int uuid = 0;
-unsigned char connection_id = 0;
+unsigned char connection_id = -1;
 
 unsigned int last_package_id = 0;
 struct ServerPackage awaiting_packages[1000];
-unsigned int packages_numer = 0;
+unsigned int packages_number = 0;
 
 void server_loop(){
     struct ServerMessage *package = malloc(sizeof(struct ServerMessage) + RECV_PACKAGE_SIZE);
@@ -22,14 +22,20 @@ void server_loop(){
 
     if(connection_id==0)
         send_init_package();
-    //     send_reliable_package(&buffer, sizeof(float));
     int n = recive_message(package, sizeof(struct ServerMessage) + RECV_PACKAGE_SIZE);
     if(n > 0){
         switch (package->type)
         {
         case INIT_CONNECTION:
-            connection_id = * (char *) &package->buffer;
-            printf("%d\n",connection_id);
+            ;
+            struct InitPackage *data = (struct InitPackage *) package->buffer;
+            connection_id = data->connection_id;
+            printf("CID: %d\n",connection_id);
+            int i;
+            for (i = 0; i < data->size; i++)
+            {
+                InitOnlinePlayer(data->players[i], connection_id);
+            }
             break;
 
         case TRUSTED_DATA:
@@ -37,7 +43,7 @@ void server_loop(){
             break;
 
         case UNTRUSTED_DATA:
-            printf("%d\n", *(int *) &package->buffer);
+            ;
             unsigned int type = package->package_identifier & 0x00ffffff;
             unsigned char pid = package->package_identifier >> 24;
             if(type==1 && pid!=connection_id){
@@ -76,18 +82,18 @@ struct ServerPackage create_package(PackageType type, unsigned int package_ident
  
 void send_reliable_package(void *buffer, unsigned int size){
     struct ServerPackage package = create_package(TRUSTED_DATA, (connection_id<<24) + last_package_id++, size, buffer);
-    awaiting_packages[packages_numer++] = package;
+    awaiting_packages[packages_number++] = package;
     send_package(package);
 }
 
 void handle_reliable_package(struct ServerMessage *package){
     printf("Server : %f\n", * (float *) &package->buffer);
-    for (unsigned int i = 0; i < packages_numer; i++)
+    for (unsigned int i = 0; i < packages_number; i++)
     {
         if(awaiting_packages[i].package_identifier == package->package_identifier){
             free(awaiting_packages[i].buffer);
-            packages_numer--;
-            memmove(&awaiting_packages[i], &awaiting_packages[i+1], (packages_numer-i)*sizeof(struct ServerPackage));
+            packages_number--;
+            memmove(&awaiting_packages[i], &awaiting_packages[i+1], (packages_number-i)*sizeof(struct ServerPackage));
             break;
         }
     }
@@ -110,4 +116,8 @@ void send_init_package(){
 void send_input_data(struct InputPackage input) {
     struct ServerPackage package = create_package(UNTRUSTED_DATA, (connection_id<<24)+1, sizeof(struct InputPackage), &input);
     send_package(package);
+}
+
+void reset_connection(){
+    connection_id = 0;
 }
