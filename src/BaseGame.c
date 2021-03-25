@@ -6,6 +6,7 @@
 extern ManagerGameState gameState;
 int initializedPlayers = 0;
 int initializedOnlinePlayers = 0;
+int localPlayerIndex = -1;
 
 struct Player Players[MAX_PLAYERS_NUMBER];
 struct PLAYER_CONTROLS C_Player[MAX_PLAYERS_NUMBER];
@@ -70,14 +71,15 @@ int G_Update(){
         }
     }
     UpdateBullets();
-    send_input_data((struct InputPackage) {
-        Players[0].TranslationV,
-        Players[0].RotationV,
-        Players[0].WillFire,
-        Players[0].PosX,
-        Players[0].PosY,
-        Players[0].Rotation
-    });
+    if(localPlayerIndex > -1)
+        send_input_data((struct InputPackage) {
+            Players[localPlayerIndex].TranslationV,
+            Players[localPlayerIndex].RotationV,
+            Players[localPlayerIndex].WillFire,
+            Players[localPlayerIndex].PosX,
+            Players[localPlayerIndex].PosY,
+            Players[localPlayerIndex].Rotation
+        });
 
     return 0;
 }
@@ -139,6 +141,9 @@ void MultiplayerInput(int i, struct InputPackage input){
 
 void HandleMultiplayerInput(unsigned char player_id, struct InputPackage input){ 
     int currentPlayer = getOnlinePlayer(player_id);
+    if(input.TranslationV){
+        printf("received from: %d\n",player_id);
+    }
     if(currentPlayer == -1){
         // send_init_package();
     }
@@ -275,6 +280,7 @@ void InitOnlinePlayer(InitPlayerPackage player_package, unsigned char local_id){
         struct OnlinePlayer player = (struct OnlinePlayer) {player_package.player_id, player_package.player_index, initializedPlayers};
         OnlinePlayers[initializedOnlinePlayers++] = player;
         if(player.player_id == local_id){
+            localPlayerIndex = player.instance_index;
             CreatePlayer(customizaitons[player.player_index].initialPosX, customizaitons[player.player_index].initialPosY, customizaitons[player.player_index].initialRotation, (struct PLAYER_CONTROLS) {ALLEGRO_KEY_W, ALLEGRO_KEY_S, ALLEGRO_KEY_A, ALLEGRO_KEY_D, ALLEGRO_KEY_SPACE}, customizaitons[player.player_index].sprite, customizaitons[player.player_index].color);
         }
         else{
