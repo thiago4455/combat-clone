@@ -49,6 +49,15 @@ struct Bullet
     int Owner;
 };
 
+struct Obstacle
+{
+    float x;
+    float y;
+    float width;
+    float height;
+};
+
+
 struct PLAYER_CONTROLS{
     unsigned char up;
     unsigned char down;
@@ -83,7 +92,8 @@ void G_EventHandler(ManagerFunctionType function_type, unsigned char event_data,
 /**
  * Inicializa as variaveis de jogo.
 **/
-void G_Start();
+void G_StartLocal();
+void G_StartOnline();
 
 
 /**
@@ -109,6 +119,7 @@ void PlayerInputDown(struct Player *player, struct PLAYER_CONTROLS controller, u
 void PlayerInputUp(struct Player *player, struct PLAYER_CONTROLS controller, unsigned char key);
 void PlayerUpdate(struct Player *player);
 void UpdateBullets();
+void VerifyBulletColisions();
 void ResetBullets();
 void InitOnlinePlayer(InitPlayerPackage player_package, unsigned char local_id);
 void HandleMultiplayerInput(unsigned char player_id, struct InputPackage input);

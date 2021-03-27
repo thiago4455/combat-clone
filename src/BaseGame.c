@@ -14,6 +14,12 @@ struct OnlinePlayer OnlinePlayers[MAX_PLAYERS_NUMBER];
 
 struct Bullet bullets[MAX_BULLET_QUANTITY];
 
+const struct Obstacle obstacles[] = {
+                                      (struct Obstacle) {900/2, 900/2, 20, 150},
+                                      (struct Obstacle) {900/2, 150, 250, 20},
+                                      (struct Obstacle) {900/2, 900-150, 250, 20},
+                                    };
+
 
 void G_EventHandler(ManagerFunctionType function_type, unsigned char event_data, char event_type){
     switch (function_type)
@@ -38,16 +44,20 @@ void G_EventHandler(ManagerFunctionType function_type, unsigned char event_data,
     }
 }
 
-void G_Start(){
+void G_StartLocal(){
+    initializedPlayers = 0;
+    CreatePlayer(90, WINDOW_HEIGHT/2, 0,
+                (struct PLAYER_CONTROLS) {ALLEGRO_KEY_W, ALLEGRO_KEY_S, ALLEGRO_KEY_A, ALLEGRO_KEY_D, ALLEGRO_KEY_SPACE},
+                "assets/tank.png", 0x0000ff);
+
+    CreatePlayer(WINDOW_WIDTH - 90, WINDOW_HEIGHT/2, ALLEGRO_PI,
+                (struct PLAYER_CONTROLS) {ALLEGRO_KEY_UP, ALLEGRO_KEY_DOWN, ALLEGRO_KEY_LEFT, ALLEGRO_KEY_RIGHT, ALLEGRO_KEY_ENTER},
+                "assets/tank2.png", 0xff0000);
+}
+
+void G_StartOnline(){
     initializedPlayers = 0;
     reset_connection();
-    // CreatePlayer(90, WINDOW_HEIGHT/2, 0,
-    //             (struct PLAYER_CONTROLS) {ALLEGRO_KEY_W, ALLEGRO_KEY_S, ALLEGRO_KEY_A, ALLEGRO_KEY_D, ALLEGRO_KEY_SPACE},
-    //             "assets/tank.png", 0x0000ff);
-
-    // CreatePlayer(WINDOW_WIDTH - 90, WINDOW_HEIGHT/2, ALLEGRO_PI,
-    //             (struct PLAYER_CONTROLS) {ALLEGRO_KEY_UP, ALLEGRO_KEY_DOWN, ALLEGRO_KEY_LEFT, ALLEGRO_KEY_RIGHT, ALLEGRO_KEY_ENTER},
-    //             "assets/tank2.png", 0xff0000);
 }
 
 void G_ProcessInput(unsigned char key, char type){
@@ -66,6 +76,7 @@ int G_Update(){
     for (i = 0; i < initializedPlayers; i++)
     {
         PlayerUpdate(&Players[i]);
+        VerifyBulletColisions();
         if(Players[i].Health <= 0){
             return 1;
         }
@@ -118,6 +129,16 @@ void G_Render(){
             al_draw_filled_circle(bullets[i].PosX, bullets[i].PosY, r, al_map_hex(Players[bullets[i].Owner].BulletColor));
         }
     }           
+
+    // 
+    // Draw obstacles
+    // 
+    for (i = 0; i < sizeof(obstacles)/sizeof(struct Obstacle); i++)
+    {
+        al_draw_rectangle(obstacles[i].x - obstacles[i].width/2, obstacles[i].y - obstacles[i].height/2, obstacles[i].x + obstacles[i].width/2, obstacles[i].y + obstacles[i].height/2, al_map_hex(0x523A28), 1);
+        al_draw_filled_rectangle(obstacles[i].x - obstacles[i].width/2, obstacles[i].y - obstacles[i].height/2, obstacles[i].x + obstacles[i].width/2, obstacles[i].y + obstacles[i].height/2, al_map_hex(0x964B00));
+    }
+    
 }
 
 // 
@@ -183,35 +204,79 @@ void PlayerInputUp(struct Player *player, struct PLAYER_CONTROLS controller, uns
 // Calculations before rendering
 // 
 
-void VerifyPlayerColisions(struct Player *player){
+void VerifyBulletColisions(){
     int i = 0;
 
     for (i = 0; i < MAX_BULLET_QUANTITY; i++)
     {
         if(bullets[i].Active){
-            float dx = abs(bullets[i].PosX - player->PosX);
-            float dy = abs(bullets[i].PosY - player->PosY);
-            float r = 3 + 30*bullets[i].Power/MAX_POWER;
-            float max_size = .6 * (al_get_bitmap_width(player->TankBitmap) > al_get_bitmap_height(player->TankBitmap)? al_get_bitmap_width(player->TankBitmap) : al_get_bitmap_height(player->TankBitmap));
 
-            if((dx < max_size/2 + r) && (dy < max_size/2 + r) && (player != &Players[bullets[i].Owner])){
-                float minD = ((COOLDOWN * FPS)/MAX_POWER);
-                player->Health -= MAX_HEALTH * (minD + ((1-minD) * bullets[i].Power/MAX_POWER));
-                if(player->Health<0){
-                    player->Health = 0;
+            // Collision with players
+            int j;
+            for (j = 0; j < initializedPlayers; j++)
+            {
+                float dx = abs(bullets[i].PosX - Players[j].PosX);
+                float dy = abs(bullets[i].PosY - Players[j].PosY);
+                float r = 3 + 30*bullets[i].Power/MAX_POWER;
+                float max_size = .6 * (al_get_bitmap_width(Players[j].TankBitmap) > al_get_bitmap_height(Players[j].TankBitmap)? al_get_bitmap_width(Players[j].TankBitmap) : al_get_bitmap_height(Players[j].TankBitmap));
+
+                if((dx < max_size/2 + r) && (dy < max_size/2 + r) && (j != bullets[i].Owner)){
+                    float minD = ((COOLDOWN * FPS)/MAX_POWER);
+                    Players[j].Health -= MAX_HEALTH * (minD + ((1-minD) * bullets[i].Power/MAX_POWER));
+                    if(Players[j].Health<0){
+                        Players[j].Health = 0;
+                    }
+                    bullets[i].Active = 0;
                 }
-                bullets[i].Active = 0;
+            }
+
+            j = 0;
+            for (j = 0; j < sizeof(obstacles)/sizeof(struct Obstacle); j++)
+            {
+                float r = 3 + 30*bullets[i].Power/MAX_POWER;
+                if((bullets[i].PosX+r > obstacles[j].x-obstacles[j].width/2 && bullets[i].PosX-r < obstacles[j].x+obstacles[j].width/2) && (bullets[i].PosY+r > obstacles[j].y-obstacles[j].height/2 && bullets[i].PosY-r < obstacles[j].y+obstacles[j].height/2)){
+                    bullets[i].Active = 0;
+                    break;
+                }
             }
         }
     }
     
 }
 
+int VerifyMovementColisions(float x, float y, struct Player *player){
+    float will_collide = 0;
+    float max_size = .25 * (al_get_bitmap_width(player->TankBitmap) > al_get_bitmap_height(player->TankBitmap)? al_get_bitmap_width(player->TankBitmap) : al_get_bitmap_height(player->TankBitmap));
+    
+    will_collide = will_collide || (x-max_size < 0 || y-max_size < 0 || x+max_size > WINDOW_WIDTH || y+max_size > WINDOW_HEIGHT);
+    
+    int i = 0;
+    for (i = 0; i < sizeof(obstacles)/sizeof(struct Obstacle); i++)
+    {
+        will_collide = will_collide || ((x+max_size > obstacles[i].x-obstacles[i].width/2 && x-max_size < obstacles[i].x+obstacles[i].width/2) && (y+max_size > obstacles[i].y-obstacles[i].height/2 && y-max_size < obstacles[i].y+obstacles[i].height/2));
+    }
+
+    for (i = 0; i < initializedPlayers; i++)
+    {
+        if(&Players[i] != player){
+            float _max_size = .25 * (al_get_bitmap_width(Players[i].TankBitmap) > al_get_bitmap_height(Players[i].TankBitmap)? al_get_bitmap_width(Players[i].TankBitmap) : al_get_bitmap_height(Players[i].TankBitmap));
+            will_collide = will_collide || ((x+max_size > Players[i].PosX-_max_size && x-max_size < Players[i].PosX+_max_size) && (y+max_size > Players[i].PosY-_max_size && y-max_size < Players[i].PosY+_max_size));
+        }
+    }
+    
+    
+    return !will_collide;
+}
+
 
 void PlayerUpdate(struct Player *player){
     player->Rotation += -ALLEGRO_PI * 0.001 * player->RotationV * PLAYER_ROTATION_VELOCITY;
-    player->PosX += player->TranslationV * PLAYER_VELOCITY * cos(player->Rotation);
-    player->PosY += player->TranslationV * PLAYER_VELOCITY * sin(player->Rotation);
+    float nX = player->PosX + player->TranslationV * PLAYER_VELOCITY * cos(player->Rotation);
+    float nY = player->PosY + player->TranslationV * PLAYER_VELOCITY * sin(player->Rotation);
+    if(VerifyMovementColisions(nX, nY, player)){
+        player->PosX = nX;
+        player->PosY = nY;
+    }
 
     if(player->Cooldown > 0)
         player->Cooldown--;
@@ -234,7 +299,7 @@ void PlayerUpdate(struct Player *player){
         
     }
 
-    VerifyPlayerColisions(player);
+    VerifyBulletColisions(player);
 }
 
 void UpdateBullets(){

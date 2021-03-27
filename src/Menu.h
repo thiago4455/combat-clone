@@ -9,6 +9,7 @@ void Renderer();
 
 typedef enum{
     START_SIMPLE_GAME = 1,
+    START_ONLINE_GAME = 2,
     EXIT = 0
 } MENU_ACTION;
 

@@ -47,8 +47,6 @@ void server_loop(){
             unsigned int type = package->package_identifier & 0x00ffffff;
             unsigned char pid = package->package_identifier >> 24;
             struct InputPackage tip = *(struct InputPackage *) &package->buffer;
-            if(tip.TranslationV)
-                printf("received %d from: %d\n", type, pid);
             if(type==1 && pid!=connection_id){
                 HandleMultiplayerInput(pid, *(struct InputPackage *) &package->buffer);
             }
