@@ -35,7 +35,7 @@ ALLEGRO_FONT *font;
 void InitMenu(){
     buttons[0] = createButtonRelativeToCenter(250, -300, 300, 50, START_SIMPLE_GAME, "Local");
     buttons[1] = createButtonRelativeToCenter(250, -210, 300, 50, START_ONLINE_GAME, "Online");
-    buttons[2] = createButtonRelativeToCenter(250, -120, 300, 50, OPEN_SCORE, "Pontuação");
+    buttons[2] = createButtonRelativeToCenter(250, -120, 300, 50, OPEN_SCORE, "Histórico");
     buttons[3] = createButtonRelativeToCenter(250, -30, 300, 50, EXIT, "Sair");
     font = al_load_font("assets/Ranchers-Regular.ttf", 30, 0);
     background_bitmap = al_load_bitmap("assets/bg.png");

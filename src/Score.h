@@ -10,6 +10,7 @@ void InitScore();
 typedef struct{
     int score1;
     int score2;
+    char *winner;
     unsigned int winnerColor;
     char show;
 } Scores;

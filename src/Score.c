@@ -80,15 +80,20 @@ void showResult(Scores s){
 
 void S_Render(){
     al_clear_to_color(al_map_hex(0x446030));
-    al_draw_text(tfont, al_map_hex(0xffffff), 450, 100, ALLEGRO_ALIGN_CENTRE, "Pontuação");
+    al_draw_text(tfont, al_map_hex(0xffffff), 450, 100, ALLEGRO_ALIGN_CENTRE, "Histórico de partidas");
     if(current_score.show){
-        al_draw_text(tfont, al_map_hex(current_score.winnerColor), 450, 200, ALLEGRO_ALIGN_CENTRE, "Venceu!!");
+        char bff0[50];
+        snprintf(bff0, 50, "%s venceu!!", current_score.winner);
+        al_draw_text(tfont, al_map_hex(0xffffff), 450, 200, ALLEGRO_ALIGN_CENTRE, bff0);
+        char bff[18];
+        snprintf(bff, 18, "%d\% vs %d\%", current_score.score1, current_score.score2);
+        al_draw_text(sfont, al_map_hex(0xffffff), 450, 250, ALLEGRO_ALIGN_CENTRE, bff);
     } else {
         int i = 0;
         for (i = 0; i < SCORE_NUMBER; i++)
         {
             char bff[18];
-            snprintf(bff, 18, "%dº - %s", i+1, score[i]);
+            snprintf(bff, 18, "%d - %s", i+1, score[i]);
             al_draw_text(sfont, al_map_hex(0xffffff), 450, 200 + i*50, ALLEGRO_ALIGN_CENTRE, bff);
         }
     }

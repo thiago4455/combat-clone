@@ -14,7 +14,7 @@ ifeq ($(OS),Windows_NT)
 	CLEAR_COMMAND = del $(TARGET).exe
 else
 	OBJFILES := $(addsuffix .o, $(OBJFILES)) LinuxClient.o
-	LINUX_FLAGS=-Wall -lallegro -lallegro_image -lallegro_primitives -lallegro_font -lallegro_ttf -lm -lpthread
+	LINUX_FLAGS=-Wall -lallegro -lallegro_image -lallegro_primitives -lallegro_font -lallegro_ttf -lallegro_audio -lallegro_acodec -lm -lpthread
 	COMMAND=gcc $(LINUX_FLAGS) -o $(TARGET) $(addprefix src/, $(OBJFILES))
 	CLEAR_COMMAND = rm -f  $(addprefix src/, $(OBJFILES)) $(TARGET) *~
 endif

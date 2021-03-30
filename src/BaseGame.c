@@ -9,6 +9,9 @@ int initializedPlayers = 0;
 int initializedOnlinePlayers = 0;
 int localPlayerIndex = -1;
 
+ALLEGRO_SAMPLE *sample_hit;
+ALLEGRO_SAMPLE *sample_shoot;
+
 struct Player Players[MAX_PLAYERS_NUMBER];
 struct PLAYER_CONTROLS C_Player[MAX_PLAYERS_NUMBER];
 struct OnlinePlayer OnlinePlayers[MAX_PLAYERS_NUMBER];
@@ -21,6 +24,13 @@ const struct Obstacle obstacles[] = {
                                       (struct Obstacle) {900/2, 900-150, 250, 20},
                                     };
 
+
+const struct PlayerCustomization customizaitons[2] = {
+    (struct PlayerCustomization) {90, 900/2, 0,0x0000ff, "assets/tank.png"},
+    (struct PlayerCustomization) {900 - 90, 900/2, ALLEGRO_PI, 0xff0000, "assets/tank2.png"},
+};
+
+ALLEGRO_FONT *gfont;
 
 void G_EventHandler(ManagerFunctionType function_type, unsigned char event_data, char event_type){
     switch (function_type)
@@ -40,7 +50,12 @@ void G_EventHandler(ManagerFunctionType function_type, unsigned char event_data,
             for (i = 0; i < initializedPlayers; i++)
             {
                 if(Players[i].Health<=0){
-                    scores = (Scores) {Players[0].Health, Players[1].Health, Players[i-1].BulletColor, 1};
+                    char *winner = malloc(sizeof(char)*20);
+                    if(i)
+                        strcpy(winner, "Azul");
+                    else
+                        strcpy(winner, "Vermelho");
+                    scores = (Scores) { Players[0].Health/MAX_HEALTH * 100, Players[1].Health/MAX_HEALTH * 100, winner, Players[i-1].BulletColor, 1};
                 }
             }
             ResetBullets();
@@ -56,6 +71,9 @@ void G_EventHandler(ManagerFunctionType function_type, unsigned char event_data,
 }
 
 void G_StartLocal(){
+    sample_hit = al_load_sample("assets/cannon.wav");
+    sample_shoot = al_load_sample("assets/hit.wav");
+    gfont = al_load_font("assets/arial.ttf", 22, 0);
     initializedPlayers = 0;
     CreatePlayer(90, WINDOW_HEIGHT/2, 0,
                 (struct PLAYER_CONTROLS) {ALLEGRO_KEY_W, ALLEGRO_KEY_S, ALLEGRO_KEY_A, ALLEGRO_KEY_D, ALLEGRO_KEY_SPACE},
@@ -67,19 +85,23 @@ void G_StartLocal(){
 }
 
 void G_StartOnline(){
+    sample_hit = al_load_sample("assets/hit.wav");
+    sample_shoot = al_load_sample("assets/cannon.wav");
+    gfont = al_load_font("assets/arial.ttf", 22, 0);
     initializedPlayers = 0;
     reset_connection();
 }
 
 void G_ProcessInput(unsigned char key, char type){
     int i;
-    for (i = 0; i < initializedPlayers; i++)
-    {
-        if(!type)
-            PlayerInputDown(&Players[i], C_Player[i], key);
-        else
-            PlayerInputUp(&Players[i], C_Player[i], key);
-    }
+    if(initializedPlayers==MAX_PLAYERS_NUMBER)
+        for (i = 0; i < initializedPlayers; i++)
+        {
+            if(!type)
+                PlayerInputDown(&Players[i], C_Player[i], key);
+            else
+                PlayerInputUp(&Players[i], C_Player[i], key);
+        }
 }
 
 int G_Update(){
@@ -150,6 +172,8 @@ void G_Render(){
         al_draw_filled_rectangle(obstacles[i].x - obstacles[i].width/2, obstacles[i].y - obstacles[i].height/2, obstacles[i].x + obstacles[i].width/2, obstacles[i].y + obstacles[i].height/2, al_map_hex(0x964B00));
     }
     
+    if(initializedPlayers<MAX_PLAYERS_NUMBER)
+        al_draw_text(gfont, al_map_hex(0xffffff), 450, 850, ALLEGRO_ALIGN_CENTRE, "Aguarde todos os jogadores se conectarem");
 }
 
 // 
@@ -162,13 +186,43 @@ void CreatePlayer(float initialPosX, float initialPosY, float initialRot, struct
 }
 
 int getOnlinePlayer(unsigned char player_id);
+
+struct PlayerCustomization getOnlinePlayerCustomization(unsigned char instance_id){
+    int i;
+    for (i = 0; i < initializedOnlinePlayers; i++)
+    {
+        if(instance_id==OnlinePlayers[i].instance_index){
+            return customizaitons[OnlinePlayers[i].player_index];
+        }
+    }
+    return customizaitons[0];
+}
+
 void MultiplayerInput(int i, struct InputPackage input){
+
+        // Trying to set player postion on start
+        // if(Players[i].TranslationV == 0){
+        //     struct PlayerCustomization c = getOnlinePlayerCustomization(i);
+        //     if(c.initialPosX == Players[i].PosX &&
+        //        c.initialPosY == Players[i].PosY &&
+        //        (c.initialRotation - 1 < Players[i].Rotation) || (c.initialRotation + 1 > Players[i].Rotation)){
+        //         Players[i].PosX = input.PosX;
+        //         Players[i].PosY = input.PosY;
+        //         Players[i].Rotation = input.Rotation;
+        //     }
+        // }
+
         Players[i].TranslationV = input.TranslationV;
         Players[i].RotationV = input.RotationV;
         Players[i].WillFire = input.WillFire;
-        // Players[i].PosX = input.PosX;
-        // Players[i].PosY = input.PosY;
-        // Players[i].Rotation = input.Rotation;
+        
+        // Set position and rotation causes player to lag
+        // if(input.PosX > Players[i].PosX + 2 || input.PosX < Players[i].PosX - 2)
+        //     Players[i].PosX = input.PosX;
+        // if(input.PosY > Players[i].PosY + 2 || input.PosY < Players[i].PosY - 2)
+        //     Players[i].PosY = input.PosY;
+        // if(input.Rotation > Players[i].Rotation + .2 || input.Rotation < Players[i].Rotation - .2)
+        //     Players[i].Rotation = input.Rotation;
 }
 
 void HandleMultiplayerInput(unsigned char player_id, struct InputPackage input){ 
@@ -238,6 +292,7 @@ void VerifyBulletColisions(){
                         Players[j].Health = 0;
                     }
                     bullets[i].Active = 0;
+                    al_play_sample(sample_hit, .3, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, 0);
                 }
             }
 
@@ -247,6 +302,7 @@ void VerifyBulletColisions(){
                 float r = 3 + 30*bullets[i].Power/MAX_POWER;
                 if((bullets[i].PosX+r > obstacles[j].x-obstacles[j].width/2 && bullets[i].PosX-r < obstacles[j].x+obstacles[j].width/2) && (bullets[i].PosY+r > obstacles[j].y-obstacles[j].height/2 && bullets[i].PosY-r < obstacles[j].y+obstacles[j].height/2)){
                     bullets[i].Active = 0;
+                    // al_play_sample(sample_hit, .3, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, 0);
                     break;
                 }
             }
@@ -304,7 +360,7 @@ void PlayerUpdate(struct Player *player){
                 bullets[0] = (struct Bullet) {1, player->Rotation, player->PosX, player->PosY, player->Power, player-Players};
                 player->Power = 0;
                 player->Cooldown = COOLDOWN * FPS;
-
+                al_play_sample(sample_shoot, .3, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, 0);
             }
         }
         
@@ -344,11 +400,6 @@ int getOnlinePlayer(unsigned char player_id)
     }
     return -1;
 }
-
-const struct PlayerCustomization customizaitons[2] = {
-    (struct PlayerCustomization) {90, 900/2, 0,0x0000ff, "assets/tank.png"},
-    (struct PlayerCustomization) {900 - 90, 900/2, ALLEGRO_PI, 0xff0000, "assets/tank2.png"},
-};
 
 void InitOnlinePlayer(InitPlayerPackage player_package, unsigned char local_id){
     int currentPlayer = getOnlinePlayer(player_package.player_id);

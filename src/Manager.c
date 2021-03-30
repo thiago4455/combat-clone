@@ -8,6 +8,7 @@
 ALLEGRO_DISPLAY *display;
 ALLEGRO_EVENT_QUEUE *queue;
 ALLEGRO_TIMER *timer;
+ALLEGRO_SAMPLE *music;
 // unsigned int WINDOW_WIDTH = 900;
 // unsigned int WINDOW_HEIGHT = 900;
 ManagerGameState gameState;
@@ -21,6 +22,8 @@ void M_Init(){
     al_init_ttf_addon();
     al_install_keyboard();
     al_install_mouse();
+    al_install_audio();
+    al_init_acodec_addon();
     // if(FULLSCREEN)
     //     al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
 
@@ -41,6 +44,10 @@ void M_Init(){
     //     WINDOW_WIDTH = info.x2 - info.x1;
     //     WINDOW_HEIGHT = info.y2 - info.y1;
     // }
+
+    music = al_load_sample("assets/music.ogg");
+    al_reserve_samples(10);
+    al_play_sample(music, .1, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, 0);
 
     InitMenu();
 
@@ -84,6 +91,7 @@ void M_Run(){
 void M_Cleanup(){
     al_destroy_display(display);
     al_destroy_event_queue(queue);
+    al_destroy_sample(music);
 }
 
 void EventManager(ManagerFunctionType function_type, unsigned char event_data, char event_type){
