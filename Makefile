@@ -2,7 +2,7 @@ ALLEGRO_VERSION=5.0.10
 MINGW_VERSION=4.7.0
 WIN_FOLDER=C:
 
-OBJFILES = main Manager Utils Menu BaseGame Client
+OBJFILES = main Manager Utils Menu BaseGame Client Score
 TARGET = combat
 
 ifeq ($(OS),Windows_NT)

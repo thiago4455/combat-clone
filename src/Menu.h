@@ -5,11 +5,11 @@
 void InitMenu();
 void MenuEventHandler(ManagerFunctionType function_type, unsigned char event_data, char event_type);
 void InputManager(unsigned char key, char type);
-void Renderer();
 
 typedef enum{
     START_SIMPLE_GAME = 1,
     START_ONLINE_GAME = 2,
+    OPEN_SCORE = 3,
     EXIT = 0
 } MENU_ACTION;
 

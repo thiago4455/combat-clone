@@ -19,7 +19,8 @@ static const unsigned int WINDOW_HEIGHT = 900;
 typedef enum{
     STATE_EXIT = 0,
     STATE_MENU = 1,
-    STATE_GAME = 2
+    STATE_GAME = 2,
+    STATE_SCORE = 3
 } ManagerGameState;
 
 typedef enum{

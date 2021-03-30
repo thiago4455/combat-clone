@@ -2,6 +2,7 @@
 #include <math.h>
 #include <stdio.h>
 #include "Client.h"
+#include "Score.h"
 
 extern ManagerGameState gameState;
 int initializedPlayers = 0;
@@ -34,8 +35,18 @@ void G_EventHandler(ManagerFunctionType function_type, unsigned char event_data,
             G_Render();
             al_flip_display();
         }else{
+            Scores scores;
+            int i = 0;
+            for (i = 0; i < initializedPlayers; i++)
+            {
+                if(Players[i].Health<=0){
+                    scores = (Scores) {Players[0].Health, Players[1].Health, Players[i-1].BulletColor, 1};
+                }
+            }
             ResetBullets();
-            gameState = STATE_MENU;
+            InitScore();
+            showResult(scores);
+            gameState = STATE_SCORE;
         }
         break;
     

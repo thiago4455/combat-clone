@@ -1,11 +1,13 @@
 #include "Menu.h"
 #include "BaseGame.h"
+#include "Score.h"
 #include <stdio.h>
 
 extern ALLEGRO_DISPLAY *display;
 extern ManagerGameState gameState;
 
 struct ALLEGRO_BITMAP *background_bitmap;
+void M_Render();
 
 void MenuEventHandler(ManagerFunctionType function_type, unsigned char event_data, char event_type){
     switch (function_type)
@@ -15,7 +17,7 @@ void MenuEventHandler(ManagerFunctionType function_type, unsigned char event_dat
         break;
     
     case GAME_RENDERER:
-        Renderer();
+        M_Render();
         break;
     
     default:
@@ -27,18 +29,19 @@ void MenuEventHandler(ManagerFunctionType function_type, unsigned char event_dat
 void InputManager(unsigned char key, char type){
 }
 
-struct MenuButton buttons[3];
+struct MenuButton buttons[4];
 ALLEGRO_FONT *font;
 
 void InitMenu(){
     buttons[0] = createButtonRelativeToCenter(250, -300, 300, 50, START_SIMPLE_GAME, "Local");
     buttons[1] = createButtonRelativeToCenter(250, -210, 300, 50, START_ONLINE_GAME, "Online");
-    buttons[2] = createButtonRelativeToCenter(250, -120, 300, 50, EXIT, "Sair");
+    buttons[2] = createButtonRelativeToCenter(250, -120, 300, 50, OPEN_SCORE, "Pontuação");
+    buttons[3] = createButtonRelativeToCenter(250, -30, 300, 50, EXIT, "Sair");
     font = al_load_font("assets/Ranchers-Regular.ttf", 30, 0);
     background_bitmap = al_load_bitmap("assets/bg.png");
 }
 
-void Renderer(){
+void M_Render(){
     al_clear_to_color(al_map_hex(0x212121));
     al_draw_scaled_bitmap(background_bitmap,0,0,800,800,0,0,WINDOW_WIDTH,WINDOW_HEIGHT,0);
     bool isMouseHover = false;
@@ -92,6 +95,12 @@ void handleClick(MENU_ACTION action){
             al_set_system_mouse_cursor(display, ALLEGRO_SYSTEM_MOUSE_CURSOR_DEFAULT);
             G_StartOnline();
             gameState = STATE_GAME;
+            break;
+
+        case OPEN_SCORE:
+            al_set_system_mouse_cursor(display, ALLEGRO_SYSTEM_MOUSE_CURSOR_DEFAULT);
+            InitScore();
+            gameState = STATE_SCORE;
             break;
 
         default:

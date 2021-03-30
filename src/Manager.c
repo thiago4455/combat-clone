@@ -3,6 +3,7 @@
 #include "Menu.h"
 #include "BaseGame.h"
 #include "Client.h"
+#include "Score.h"
 
 ALLEGRO_DISPLAY *display;
 ALLEGRO_EVENT_QUEUE *queue;
@@ -94,6 +95,10 @@ void EventManager(ManagerFunctionType function_type, unsigned char event_data, c
 
         case STATE_GAME:
             G_EventHandler(function_type, event_data, event_type);
+            break;
+
+        case STATE_SCORE:
+            ScoreEventHandler(function_type, event_data, event_type);
             break;
         
         default:
